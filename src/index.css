@@ -2,57 +2,72 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Drilling Engineering Interface Design System */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    /* Base colors - Professional drilling software palette */
+    --background: 240 6% 98%;
+    --foreground: 217 19% 12%;
+    
+    /* Technical blue primary palette */
+    --primary: 214 84% 56%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 214 84% 46%;
+    
+    /* Professional secondary palette */
+    --secondary: 215 25% 27%;
+    --secondary-foreground: 0 0% 100%;
+    
+    /* Data quality status colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --error: 0 84% 60%;
+    --error-foreground: 0 0% 100%;
+    
+    /* Surface colors */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
+    --card-foreground: 217 19% 12%;
+    --muted: 215 25% 96%;
+    --muted-foreground: 215 16% 47%;
+    
+    /* Technical accent colors */
+    --accent: 201 96% 32%;
+    --accent-foreground: 0 0% 100%;
+    
+    /* Border and input styling */
+    --border: 215 20% 85%;
+    --input: 215 20% 85%;
+    --ring: 214 84% 56%;
+    
+    /* Progress and step indicators */
+    --progress-bg: 215 25% 92%;
+    --progress-fill: 214 84% 56%;
+    --step-active: 214 84% 56%;
+    --step-complete: 142 76% 36%;
+    --step-inactive: 215 16% 65%;
+    
+    /* Data table styling */
+    --table-header: 215 25% 27%;
+    --table-row-even: 215 25% 97%;
+    --table-row-hover: 214 84% 95%;
+    
+    /* Shadows and gradients */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --gradient-primary: linear-gradient(135deg, hsl(214 84% 56%), hsl(201 96% 32%));
+    --gradient-surface: linear-gradient(180deg, hsl(0 0% 100%), hsl(215 25% 98%));
+    
     --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Additional semantic colors */
+    --popover: 0 0% 100%;
+    --popover-foreground: 217 19% 12%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
   }
 
   .dark {

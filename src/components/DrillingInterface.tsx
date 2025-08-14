@@ -1,0 +1,142 @@
+import { useState } from "react";
+import { StepProgress } from "./StepProgress";
+import { FileUpload } from "./FileUpload";
+import { DataAudit } from "./DataAudit";
+import { TimestampFormat } from "./TimestampFormat";
+import { ColumnMapping } from "./ColumnMapping";
+import { DataPreview } from "./DataPreview";
+
+export type DrillingData = {
+  filename: string;
+  headers: string[];
+  data: any[];
+  units: string[];
+  auditResults?: {
+    completeness: number;
+    conformity: boolean;
+    continuity: boolean;
+    timestampFormat?: string;
+  };
+  mappedColumns?: Array<{
+    original: string;
+    mapped: string;
+    originalUnit: string;
+    mappedUnit: string;
+  }>;
+};
+
+const steps = [
+  { id: 1, title: "File Upload", description: "Upload LAS, XLSX, or CSV file" },
+  { id: 2, title: "Data Audit", description: "Quality and conformity check" },
+  { id: 3, title: "Timestamp Format", description: "Standardize timestamp format" },
+  { id: 4, title: "Column Mapping", description: "Map channels to standard names" },
+  { id: 5, title: "Preview & Export", description: "Review and export mapped data" },
+];
+
+export const DrillingInterface = () => {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [data, setData] = useState<DrillingData | null>(null);
+
+  const handleNext = () => {
+    if (currentStep < 5) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const updateData = (newData: Partial<DrillingData>) => {
+    setData(prev => prev ? { ...prev, ...newData } : null);
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto py-8">
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Drilling Channel Mapping Interface
+          </h1>
+          <p className="text-muted-foreground">
+            Process and map drilling sensor data from stoppages to standardized channel names
+          </p>
+        </header>
+
+        <div className="mb-8">
+          <StepProgress steps={steps} currentStep={currentStep} />
+        </div>
+
+        <div className="bg-card rounded-lg border p-6">
+          {currentStep === 1 && (
+            <FileUpload 
+              onFileProcessed={(fileData) => {
+                setData(fileData);
+                handleNext();
+              }}
+            />
+          )}
+          
+          {currentStep === 2 && data && (
+            <DataAudit 
+              data={data}
+              onAuditComplete={(auditResults) => {
+                updateData({ auditResults });
+                handleNext();
+              }}
+            />
+          )}
+          
+          {currentStep === 3 && data && (
+            <TimestampFormat 
+              data={data}
+              onFormatComplete={() => handleNext()}
+            />
+          )}
+          
+          {currentStep === 4 && data && (
+            <ColumnMapping 
+              data={data}
+              onMappingComplete={(mappedColumns) => {
+                updateData({ mappedColumns });
+                handleNext();
+              }}
+            />
+          )}
+          
+          {currentStep === 5 && data && (
+            <DataPreview 
+              data={data}
+              onExport={() => {
+                // Export functionality
+                console.log("Exporting data...", data);
+              }}
+            />
+          )}
+        </div>
+
+        <div className="flex justify-between mt-6">
+          <button
+            onClick={handlePrevious}
+            disabled={currentStep === 1}
+            className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary/80"
+          >
+            Previous
+          </button>
+          
+          {currentStep < 5 && (
+            <button
+              onClick={handleNext}
+              disabled={!data && currentStep > 1}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-hover"
+            >
+              Next
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
