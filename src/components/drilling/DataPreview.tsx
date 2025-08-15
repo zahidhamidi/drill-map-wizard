@@ -47,14 +47,47 @@ export const DataPreview = ({ data, onExport }: DataPreviewProps) => {
   };
 
   const generateLASContent = (mappedData: any[], headers: any[]) => {
-    let content = `# LAS File - Mapped Drilling Data\n`;
-    content += `# Generated from: ${data.filename}\n`;
-    content += `# Processing date: ${new Date().toISOString()}\n\n`;
+    let content = '';
     
-    // Headers
-    content += headers.map(h => `${h.mapped} (${h.unit})`).join('\t') + '\n';
+    // Use original LAS header if available
+    if (data.originalLasHeader) {
+      content = data.originalLasHeader + '\n';
+      
+      // Update well information in header if provided
+      if (data.customerName || data.wellName) {
+        const lines = content.split('\n');
+        const wellInfoIndex = lines.findIndex(line => line.includes('~Well Information'));
+        if (wellInfoIndex > -1) {
+          if (data.wellName) {
+            lines.splice(wellInfoIndex + 1, 0, `WELL.${data.wellName} : ${data.wellName}`);
+          }
+          if (data.customerName) {
+            lines.splice(wellInfoIndex + 1, 0, `COMP.${data.customerName} : ${data.customerName}`);
+          }
+        }
+        content = lines.join('\n');
+      }
+    } else {
+      // Generate basic LAS header
+      content += `~Version Information\n`;
+      content += `VERS.   2.0 : CWLS log ASCII Standard -VERSION 2.0\n`;
+      content += `WRAP.    NO : One line per depth step\n`;
+      content += `~Well Information\n`;
+      if (data.wellName) content += `WELL.${data.wellName} : ${data.wellName}\n`;
+      if (data.customerName) content += `COMP.${data.customerName} : ${data.customerName}\n`;
+      content += `DATE.${new Date().toISOString().split('T')[0]} : LOG DATE\n`;
+      content += `~Curve Information\n`;
+      headers.forEach(h => {
+        content += `${h.mapped}.${h.unit} : ${h.mapped}\n`;
+      });
+      content += `~Parameter Information\n`;
+      content += `~Other Information\n`;
+      content += `Generated from: ${data.filename}\n`;
+      content += `Processing date: ${new Date().toISOString()}\n`;
+      content += `~ASCII\n`;
+    }
     
-    // Data
+    // Data section
     mappedData.forEach(row => {
       content += headers.map(h => row[h.mapped] || '').join('\t') + '\n';
     });

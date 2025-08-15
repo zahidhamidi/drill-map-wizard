@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { ArrowRight, Search } from "lucide-react";
 import { DrillingData } from "./DrillingInterface";
+import { ChannelBankItem } from "./ChannelBank";
 
 type ColumnMappingProps = {
   data: DrillingData;
+  channelBank: ChannelBankItem[];
   onMappingComplete: (mappings: Array<{
     original: string;
     mapped: string;
@@ -25,19 +27,21 @@ const channelBank = {
   "NEUTRON": { standardName: "NPHI", unit: "fraction" },
 };
 
-export const ColumnMapping = ({ data, onMappingComplete }: ColumnMappingProps) => {
+export const ColumnMapping = ({ data, channelBank, onMappingComplete }: ColumnMappingProps) => {
   const [mappings, setMappings] = useState(() => {
     return data.headers.map((header, index) => {
-      const matchedChannel = Object.entries(channelBank).find(([key]) => 
-        header.toLowerCase().includes(key.toLowerCase()) || 
-        key.toLowerCase().includes(header.toLowerCase())
+      const headerLower = header.toLowerCase().trim();
+      
+      // Find matching channel from bank
+      const matchedChannel = channelBank.find(channel =>
+        channel.aliases.some(alias => alias.toLowerCase() === headerLower)
       );
       
       return {
         original: header,
-        mapped: matchedChannel ? matchedChannel[1].standardName : "",
-        originalUnit: data.units[index] || "",
-        mappedUnit: matchedChannel ? matchedChannel[1].unit : ""
+        mapped: matchedChannel ? matchedChannel.standardName : '',
+        originalUnit: data.units[index] || '',
+        mappedUnit: matchedChannel ? data.units[index] || '' : ''
       };
     });
   });
@@ -54,8 +58,8 @@ export const ColumnMapping = ({ data, onMappingComplete }: ColumnMappingProps) =
     onMappingComplete(mappings);
   };
 
-  const standardChannels = Object.values(channelBank).map(channel => channel.standardName);
-  const standardUnits = [...new Set(Object.values(channelBank).map(channel => channel.unit))];
+  const standardChannels = [...new Set(channelBank.map(channel => channel.standardName))];
+  const standardUnits = ["ft", "m", "API", "ohm.m", "fraction", "g/cm3", "datetime", "sec"];
 
   const filteredChannels = standardChannels.filter(channel => 
     channel.toLowerCase().includes(searchTerm.toLowerCase())
@@ -132,10 +136,21 @@ export const ColumnMapping = ({ data, onMappingComplete }: ColumnMappingProps) =
         <div className="bg-card border rounded-lg p-4">
           <h3 className="font-medium text-foreground mb-3">Channel Bank Dictionary</h3>
           <div className="space-y-2 max-h-40 overflow-y-auto">
-            {Object.entries(channelBank).map(([key, value]) => (
-              <div key={key} className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{key}</span>
-                <span className="font-medium text-foreground">{value.standardName}</span>
+            {channelBank.map((channel) => (
+              <div key={channel.id} className="text-sm">
+                <div className="flex justify-between mb-1">
+                  <span className="font-medium text-primary">{channel.standardName}</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {channel.aliases.map((alias, aliasIndex) => (
+                    <span
+                      key={aliasIndex}
+                      className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded"
+                    >
+                      {alias}
+                    </span>
+                  ))}
+                </div>
               </div>
             ))}
           </div>

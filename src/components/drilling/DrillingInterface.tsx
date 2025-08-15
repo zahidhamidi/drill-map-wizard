@@ -5,12 +5,17 @@ import { DataAudit } from "./DataAudit";
 import { TimestampFormat } from "./TimestampFormat";
 import { ColumnMapping } from "./ColumnMapping";
 import { DataPreview } from "./DataPreview";
+import { ChannelBank, ChannelBankItem } from "./ChannelBank";
 
 export type DrillingData = {
   filename: string;
   headers: string[];
   data: any[];
   units: string[];
+  customerName?: string;
+  wellName?: string;
+  dataType?: 'depth' | 'time';
+  originalLasHeader?: string;
   auditResults?: {
     completeness: number;
     conformity: boolean;
@@ -26,6 +31,7 @@ export type DrillingData = {
 };
 
 const steps = [
+  { id: 0, title: "Channel Bank", description: "Manage standard channel database" },
   { id: 1, title: "File Upload", description: "Upload LAS, XLSX, or CSV file" },
   { id: 2, title: "Data Audit", description: "Quality and conformity check" },
   { id: 3, title: "Timestamp Format", description: "Standardize timestamp format" },
@@ -34,8 +40,9 @@ const steps = [
 ];
 
 export const DrillingInterface = () => {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0);
   const [data, setData] = useState<DrillingData | null>(null);
+  const [channelBank, setChannelBank] = useState<ChannelBankItem[]>([]);
 
   const handleNext = () => {
     if (currentStep < 5) {
@@ -44,7 +51,7 @@ export const DrillingInterface = () => {
   };
 
   const handlePrevious = () => {
-    if (currentStep > 1) {
+    if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
   };
@@ -70,6 +77,12 @@ export const DrillingInterface = () => {
         </div>
 
         <div className="bg-card rounded-lg border p-6">
+          {currentStep === 0 && (
+            <ChannelBank 
+              onChannelBankUpdate={setChannelBank}
+            />
+          )}
+
           {currentStep === 1 && (
             <FileUpload 
               onFileProcessed={(fileData) => {
@@ -89,16 +102,34 @@ export const DrillingInterface = () => {
             />
           )}
           
-          {currentStep === 3 && data && (
+          {currentStep === 3 && data && data.dataType === 'time' && (
             <TimestampFormat 
               data={data}
               onFormatComplete={() => handleNext()}
             />
           )}
+
+          {currentStep === 3 && data && data.dataType === 'depth' && (
+            <div className="text-center py-8">
+              <h2 className="text-2xl font-semibold text-foreground mb-2">
+                Timestamp Formatting Skipped
+              </h2>
+              <p className="text-muted-foreground mb-4">
+                Depth-based data selected. Timestamp formatting step is not required.
+              </p>
+              <button
+                onClick={handleNext}
+                className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary-hover"
+              >
+                Continue to Column Mapping
+              </button>
+            </div>
+          )}
           
           {currentStep === 4 && data && (
             <ColumnMapping 
               data={data}
+              channelBank={channelBank}
               onMappingComplete={(mappedColumns) => {
                 updateData({ mappedColumns });
                 handleNext();
@@ -120,7 +151,7 @@ export const DrillingInterface = () => {
         <div className="flex justify-between mt-6">
           <button
             onClick={handlePrevious}
-            disabled={currentStep === 1}
+            disabled={currentStep === 0}
             className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary/80"
           >
             Previous
@@ -129,7 +160,7 @@ export const DrillingInterface = () => {
           {currentStep < 5 && (
             <button
               onClick={handleNext}
-              disabled={!data && currentStep > 1}
+              disabled={!data && currentStep > 0}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-hover"
             >
               Next
