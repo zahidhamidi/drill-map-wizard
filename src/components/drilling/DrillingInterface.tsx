@@ -1,11 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Database } from "lucide-react";
 import { StepProgress } from "./StepProgress";
 import { FileUpload } from "./FileUpload";
 import { DataAudit } from "./DataAudit";
 import { TimestampFormat } from "./TimestampFormat";
 import { ColumnMapping } from "./ColumnMapping";
 import { DataPreview } from "./DataPreview";
-import { ChannelBank, ChannelBankItem } from "./ChannelBank";
+import { ChannelBankItem } from "./ChannelBank";
 
 export type DrillingData = {
   filename: string;
@@ -31,21 +34,21 @@ export type DrillingData = {
 };
 
 const steps = [
-  { id: 0, title: "Channel Bank", description: "Manage standard channel database" },
-  { id: 1, title: "File Upload", description: "Upload LAS, XLSX, or CSV file" },
-  { id: 2, title: "Data Audit", description: "Quality and conformity check" },
-  { id: 3, title: "Timestamp Format", description: "Standardize timestamp format" },
-  { id: 4, title: "Column Mapping", description: "Map channels to standard names" },
-  { id: 5, title: "Preview & Export", description: "Review and export mapped data" },
+  { id: 0, title: "File Upload", description: "Upload LAS, XLSX, or CSV file" },
+  { id: 1, title: "Data Audit", description: "Quality and conformity check" },
+  { id: 2, title: "Timestamp Format", description: "Standardize timestamp format" },
+  { id: 3, title: "Column Mapping", description: "Map channels to standard names" },
+  { id: 4, title: "Preview & Export", description: "Review and export mapped data" },
 ];
 
 export const DrillingInterface = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [data, setData] = useState<DrillingData | null>(null);
   const [channelBank, setChannelBank] = useState<ChannelBankItem[]>([]);
 
   const handleNext = () => {
-    if (currentStep < 5) {
+    if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -63,13 +66,22 @@ export const DrillingInterface = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-8">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Drilling Channel Mapping Interface
-          </h1>
-          <p className="text-muted-foreground">
-            Process and map drilling sensor data from stoppages to standardized channel names
-          </p>
+        <header className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Drilling Channel Mapping Interface
+            </h1>
+            <p className="text-muted-foreground">
+              Process and map drilling sensor data from stoppages to standardized channel names
+            </p>
+          </div>
+          <Button
+            onClick={() => navigate("/channel-bank")}
+            className="flex items-center gap-2"
+          >
+            <Database className="w-4 h-4" />
+            Channel Bank
+          </Button>
         </header>
 
         <div className="mb-8">
@@ -78,12 +90,6 @@ export const DrillingInterface = () => {
 
         <div className="bg-card rounded-lg border p-6">
           {currentStep === 0 && (
-            <ChannelBank 
-              onChannelBankUpdate={setChannelBank}
-            />
-          )}
-
-          {currentStep === 1 && (
             <FileUpload 
               onFileProcessed={(fileData) => {
                 setData(fileData);
@@ -92,7 +98,7 @@ export const DrillingInterface = () => {
             />
           )}
           
-          {currentStep === 2 && data && (
+          {currentStep === 1 && data && (
             <DataAudit 
               data={data}
               onAuditComplete={(auditResults) => {
@@ -102,14 +108,14 @@ export const DrillingInterface = () => {
             />
           )}
           
-          {currentStep === 3 && data && data.dataType === 'time' && (
+          {currentStep === 2 && data && data.dataType === 'time' && (
             <TimestampFormat 
               data={data}
               onFormatComplete={() => handleNext()}
             />
           )}
 
-          {currentStep === 3 && data && data.dataType === 'depth' && (
+          {currentStep === 2 && data && data.dataType === 'depth' && (
             <div className="text-center py-8">
               <h2 className="text-2xl font-semibold text-foreground mb-2">
                 Timestamp Formatting Skipped
@@ -126,7 +132,7 @@ export const DrillingInterface = () => {
             </div>
           )}
           
-          {currentStep === 4 && data && (
+          {currentStep === 3 && data && (
             <ColumnMapping 
               data={data}
               channelBank={channelBank}
@@ -137,7 +143,7 @@ export const DrillingInterface = () => {
             />
           )}
           
-          {currentStep === 5 && data && (
+          {currentStep === 4 && data && (
             <DataPreview 
               data={data}
               onExport={() => {
@@ -157,10 +163,10 @@ export const DrillingInterface = () => {
             Previous
           </button>
           
-          {currentStep < 5 && (
+          {currentStep < 4 && (
             <button
               onClick={handleNext}
-              disabled={!data && currentStep > 0}
+              disabled={!data}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-hover"
             >
               Next
