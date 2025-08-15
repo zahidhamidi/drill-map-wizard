@@ -1,7 +1,7 @@
 import { DrillingInterface } from "@/components/drilling/DrillingInterface";
 
-const Index = () => {
+const ChannelMapping = () => {
   return <DrillingInterface />;
 };
 
-export default Index;
+export default ChannelMapping;
